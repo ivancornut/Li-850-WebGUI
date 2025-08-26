@@ -5,7 +5,6 @@ import serial.tools.list_ports
 import threading
 import re
 import pandas as pd
-import sys
 
 class Li_850_client():
     def __init__(self, port=None, baudrate=9600,timeout=1):
@@ -182,16 +181,19 @@ def update_line_plot():
         line_plot.update_figure(line_plot.figure)
 
 
-filename_input = ui.input('Enter filename', placeholder='filename') 
-ui.button('Save filename', on_click=get_values)
-connect_button = ui.button("Connect",on_click=connect_device)
-disconnect_button = ui.button("Disconnect",on_click=disconnect_device)
+with ui.row():
+    filename_input = ui.input('Enter filename', placeholder='filename') 
+    ui.button('Save filename', on_click=get_values)
+with ui.row():
+    connect_button = ui.button("Connect to Li-850",on_click=connect_device)
+    disconnect_button = ui.button("Disconnect",on_click=disconnect_device)
 start_button = ui.button("Start Measurements", on_click=start_reading)
 disconnect_button.enabled = False
 start_button.enabled = False
 
 line_updates = ui.timer(5, update_line_plot, active=False)
-line_plot = plot = ui.plotly({'data': [{'x': [0],'y': [0],'type': 'scatter','mode': 'lines+markers','name': 'data'}],'layout': {'title': 'CO2 concentration'}})
+with ui.card().tight():
+    line_plot = plot = ui.plotly({'data': [{'x': [0],'y': [0],'type': 'scatter','mode': 'lines+markers','name': 'data'}],'layout': {'title': 'CO2 concentration'}})
 
 try:
     ui.run()     
