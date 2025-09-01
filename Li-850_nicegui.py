@@ -1,4 +1,4 @@
-from nicegui import ui
+from nicegui import ui, app
 import serial
 import time
 import serial.tools.list_ports
@@ -23,6 +23,20 @@ class Li_850_client():
         self.CO2_conc = None
         self.is_connected = False
         self.user = "None"
+        self.sensor = False
+
+        try:
+            import board
+            import adafruit_sht4x
+            self.i2c = board.I2C()
+            self.sht = adafruit_sht4x.SHT4x(self.i2c)
+            print("Found SHT4x with serial number", hex(self.sht.serial_number))
+            self.sht.mode = adafruit_sht4x.Mode.NOHEAT_HIGHPRECISION
+            self.sensor = True
+        except Exception as e:
+            print(e)
+            self.sensor = False
+
     
     def list_available_ports(self):
         """List all available serial ports"""
@@ -154,8 +168,17 @@ class Li_850_client():
         temp_match = re.search(r'<celltemp>(.*?)</celltemp', cleaned_data)
         temp_value = float(temp_match.group(1)) if temp_match else None
 
-        #print(co2_value,h2o_value,press_value,temp_value)
-        return (co2_value, h2o_value, press_value, temp_value)
+        # Extract air temp using I2C sensor
+        if self.sensor:
+            try:
+                temp_air, rel_hum_air = self.sht.measurements()
+            except Exception as e:
+                print(e)
+        else:
+            temp_air = 9999
+            rel_hum_air=9999
+
+        return (co2_value, h2o_value, press_value, temp_value,temp_air,rel_hum_air)
 
     def save_data_in_dataframe(self,values=None,finished = False):
         if finished == True:
@@ -173,12 +196,14 @@ class Li_850_client():
             if self.new_dataframe:
                 self.start_time = time.time()
                 dict_values = {"elapsed_time": time.time()-self.start_time,"CO2_ppm":values[0], "H2O":values[1],
-                               "Cell_pressure":values[2],"Cell_temp":values[3],"user":self.user}
+                               "Cell_pressure":values[2],"Cell_temp":values[3],"Air_temp":values[4],
+                               "Rel_hum_air":values[5], "user":self.user}
                 self.data_frame = pd.DataFrame(dict_values,index = [0])
                 self.record_number = 1
             else:
                 dict_values = {"elapsed_time": time.time()-self.start_time,"CO2_ppm":values[0], "H2O":values[1],
-                               "Cell_pressure":values[2],"Cell_temp":values[3],"user":self.user}
+                               "Cell_pressure":values[2],"Cell_temp":values[3],"Air_temp":values[4],
+                               "Rel_hum_air":values[5], "user":self.user}
                 self.data_frame = pd.concat([self.data_frame,pd.DataFrame(dict_values, index =[self.record_number])])
                 self.data_frame.to_csv("data/"+self.full_filename,index_label='rcrd_nb')
                 self.record_number = self.record_number+1
@@ -230,7 +255,6 @@ def start_reading():
     reader.start_continuous_reading()
     connect_expansion.close()
     
-
 def stop_reading():
     reader.recording = False
     disconnect_button.enabled = True
@@ -239,6 +263,7 @@ def stop_reading():
     user_save_button.enabled = True
     stop_button.enabled = False
     reader.stop_reading()
+    ui.download.file("data/"+reader.full_filename)
     reader.update_full_filename()
     filename_label.text = "Filename updated for next: "+ reader.full_filename
     connect_expansion.open()
@@ -276,6 +301,8 @@ def save_user():
         connect_button.enabled = True
         connect_expansion.open()
         user_expansion.close()
+def download():
+    ui.download.file("data/"+reader.full_filename)
 
 ui.html('<h1>Li-850 GUI interface<h1>').style(' font-weight: bold; font-size: 3rem')
 with ui.expansion('User').style('color: #888; font-weight: bold; font-size: 2rem') as user_expansion:
@@ -306,9 +333,11 @@ with ui.expansion('Measurement').style('color: #888; font-weight: bold; font-siz
         with ui.row():
             start_button = ui.button("Start Measurement", on_click=start_reading, color = '#099427', icon='start').style("color:black")
             stop_button = ui.button("Stop Measurement", on_click=stop_reading, color  ='#910617', icon='stop').style("color:black")
-        line_plot = ui.plotly({'data': [{'x': [0],'y': [0],'type': 'scatter','mode': 'lines+markers','name': 'data'}],
+            ui.button('Download data file', on_click=download)
+line_plot = ui.plotly({'data': [{'x': [0],'y': [0],'type': 'scatter','mode': 'lines+markers','name': 'data'}],
                                     'layout': {'title': 'Real time data','xaxis': {'title':{'text':'Time (s)'} },
                                                 'yaxis': {'title':{'text':'CO2 concentration (ppm)'} }}})
+
 
 disconnect_button.enabled = False
 start_button.enabled = False
