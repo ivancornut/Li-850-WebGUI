@@ -171,8 +171,11 @@ class Li_850_client():
         # Extract air temp using I2C sensor
         if self.sensor:
             try:
-                temp_air, rel_hum_air = self.sht.measurements()
+                #print(self.sht_measurements)
+                temp_air, rel_hum_air = self.sht.measurements
             except Exception as e:
+                temp_air = 9999
+                rel_hum_air = 9999
                 print(e)
         else:
             temp_air = 9999
