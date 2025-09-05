@@ -10,16 +10,20 @@ You can:
 - Stop a measurement (with automatic download of the generated csv to your phone)
 
 ## Installation
+First install necessary python modules on the raspberry pi:
+```
+sudo apt install python-dev
+```
 Create a python virtual env: 
 ```
 python -m venv my_env
 ```
 Then activate and install the libraries:
 ```
-sudo my_env/bin/activate
+source my_env/bin/activate
 pip install pandas nicegui pyserial
 ```
 
-## Graphical intreface
+## Graphical interface
 <img width="436" height="968" alt="image" src="https://github.com/user-attachments/assets/7f92d5a8-94ea-448f-bf75-61c71066104a" />
 
