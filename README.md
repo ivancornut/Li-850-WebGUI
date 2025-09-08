@@ -23,6 +23,21 @@ Then activate and install the libraries:
 source my_env/bin/activate
 pip install pandas nicegui pyserial
 ```
+Download this repository:
+```
+git clone https://github.com/ivancornut/Li-850-WebGUI
+```
+Enter the directory:
+```
+cd Li-850-WebGUI
+```
+Create a data directory:
+```
+mkdir data
+```
+
+## Automatic startup on launch
+Soon ...
 
 ## Graphical interface
 <img width="436" height="968" alt="image" src="https://github.com/user-attachments/assets/7f92d5a8-94ea-448f-bf75-61c71066104a" />
