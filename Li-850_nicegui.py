@@ -55,6 +55,15 @@ class Li_850_client():
                 available_ports.append(port.device)
         return available_ports
 
+    def read_filenames(self):
+        try:
+            with open("config_filenames.ini","r") as f:
+                filename_list = [line.strip() for line in f.readlines()]
+        except:
+            filename_list = []
+            print("No filename config file found")
+        return filename_list
+    
     def connect(self, port=None):
         if port:
             self.port = port
@@ -288,6 +297,17 @@ def get_values():
     if reader.is_connected:
         start_button.enabled = True
 
+def select_filename():
+    if filename_select.value is None:
+        reader.filename = "fake_data.csv"
+    else:
+        reader.filename = filename_select.value
+    reader.filename_exists = True
+    reader.update_full_filename()
+    filename_label.text = "Current filename: "+ reader.full_filename
+    if reader.is_connected:
+        start_button.enabled = True
+
 def update_line_plot():
     if reader.data_frame is not None:
         line_plot.figure['data'][0]['x'] = reader.data_frame['elapsed_time'].tolist()
@@ -307,7 +327,7 @@ def save_user():
 def download():
     ui.download.file("data/"+reader.full_filename)
 
-ui.html('<h1>Li-850 GUI interface<h1>').style(' font-weight: bold; font-size: 3rem')
+ui.html('<h1>Li-850 interface for soil respiration<h1>').style(' font-weight: bold; font-size: 3rem')
 with ui.expansion('User').style('color: #888; font-weight: bold; font-size: 2rem') as user_expansion:
     with ui.row():
         user_input = ui.input("Enter User", placeholder='User')
@@ -329,9 +349,17 @@ with ui.expansion('Connection').style('color: #888; font-weight: bold; font-size
 
 with ui.expansion('Measurement').style('color: #888; font-weight: bold; font-size: 2rem') as measure_expansion:
     with ui.card():
+        ui.markdown('''
+        **First**: you need to either select a filename from a list or create a new filename  
+        **Second**: when you are ready to lock the chamber on the collar click start measurement  
+        **Third**: Once the measurement is finished click on stop measurement and the file will be downloaded to your phone
+        ''').style('color: #000000; font-weight: normal; font-size: 1rem')
         with ui.row(): 
-            filename_input = ui.input('Enter filename', placeholder='filename').props("size=30").style('background-color: #f8f8f8;font-size: 1.2rem')
-            ui.button('Save filename', on_click=get_values)
+            filename_select = ui.select(reader.read_filenames(),with_input = True)
+            select_filename_button =ui.button("Use selected filename",on_click = select_filename)
+        with ui.row():
+            filename_input = ui.input('Or enter new filename', placeholder='filename').props("size=30").style('background-color: #f8f8f8;font-size: 1.2rem')
+            filename_input_button = ui.button('Save new filename', on_click=get_values)
         filename_label = ui.label('No filename yet').style('color: #888; font-weight: bold; font-size: 1.5rem')
         with ui.row():
             start_button = ui.button("Start Measurement", on_click=start_reading, color = '#099427', icon='start').style("color:black")
@@ -340,7 +368,11 @@ with ui.expansion('Measurement').style('color: #888; font-weight: bold; font-siz
 line_plot = ui.plotly({'data': [{'x': [0],'y': [0],'type': 'scatter','mode': 'lines+markers','name': 'data'}],
                                     'layout': {'title': 'Real time data','xaxis': {'title':{'text':'Time (s)'} },
                                                 'yaxis': {'title':{'text':'CO2 concentration (ppm)'} }}})
-
+ui.markdown('''
+            The data you are aiming for should provide enough points to fit  
+            a function. It is not necessary to go to high in concentration  
+            since that will impede diffusion of CO2 from soil to chamber
+        ''').style('color: #000000; font-weight: normal; font-size: 1rem')
 
 disconnect_button.enabled = False
 start_button.enabled = False
