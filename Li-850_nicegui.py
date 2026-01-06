@@ -28,6 +28,7 @@ class Li_850_client():
         self.is_connected = False
         self.user = "None"
         self.sensor = False
+        self.oled = False
 	
         try:
             import board
@@ -60,6 +61,7 @@ class Li_850_client():
             self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=0, fill=0)
             # Load default font.
             self.oled_font = ImageFont.load_default()
+            self.oled = True
         except Exception as e:
             print(e)
 			
@@ -368,10 +370,13 @@ def refresh_ports():
     port_select.set_options(reader.list_available_ports_in_list())
 
 def update_oled():
-    reader.get_ssid()
-    reader.get_ip()
-    reader.draw.text((2, 2 + 0), "SSID: " + reader.ssid, font=reader.oled_font, fill=255)
-    reader.draw.text((2, 2 + 8), "IP: " + reader.ip_adress, font=reader.oled_font, fill=255)
+    if reader.oled:
+        reader.get_ssid()
+        reader.get_ip()
+        reader.draw.text((2, 2 + 0), "SSID: " + reader.ssid, font=reader.oled_font, fill=255)
+        reader.draw.text((2, 2 + 8), "IP: " + reader.ip_adress, font=reader.oled_font, fill=255)
+    else:
+        print("No oled screen")
 
 def save_user():
     print(user_input.value)
