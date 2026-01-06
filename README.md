@@ -22,6 +22,8 @@ Then activate and install the libraries:
 ```
 source my_env/bin/activate
 pip install pandas nicegui pyserial
+pip install adafruit-circuipython-ssd1306
+sudo apt install python3-pil
 ```
 Download this repository:
 ```
