@@ -63,6 +63,7 @@ class Li_850_client():
             self.oled_font = ImageFont.load_default()
             self.oled = True
         except Exception as e:
+            self.oled = False
             print(e)
 			
         self.ip_adress = "Not connected"
