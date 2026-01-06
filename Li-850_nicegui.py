@@ -48,7 +48,7 @@ class Li_850_client():
         
         try:
             self.disp = adafruit_ssd1306.SSD1306_I2C(128, 64, self.i2c)
-            self.disp.fill(100)
+            self.disp.fill(50)
             self.disp.show()
             # Create blank image for drawing.
             # Make sure to create image with mode '1' for 1-bit color.
@@ -58,7 +58,8 @@ class Li_850_client():
             # Get drawing object to draw on image.
             self.draw = ImageDraw.Draw(self.image)
             # Draw a black filled box to clear the image.
-            self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=0, fill=255)
+            #self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=100, fill=255)
+            self.draw.text((0,0), text = "Loading...",outline = 100,fill=255)
             # Load default font.
             self.oled_font = ImageFont.load_default()
             self.oled = True
