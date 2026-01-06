@@ -6,6 +6,10 @@ import threading
 import re
 import pandas as pd
 from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
+import adafruit_ssd1306
+import subprocess
+import socket
 
 class Li_850_client():
     def __init__(self, port=None, baudrate=9600,timeout=1):
@@ -24,11 +28,15 @@ class Li_850_client():
         self.is_connected = False
         self.user = "None"
         self.sensor = False
-
+	
+		try:
+			import board
+			self.i2c = board.I2C()
+		except Exception as e:
+			print(e)
+        
         try:
-            import board
             import adafruit_sht4x
-            self.i2c = board.I2C()
             self.sht = adafruit_sht4x.SHT4x(self.i2c)
             print("Found SHT4x with serial number", hex(self.sht.serial_number))
             self.sht.mode = adafruit_sht4x.Mode.NOHEAT_HIGHPRECISION
@@ -36,7 +44,50 @@ class Li_850_client():
         except Exception as e:
             print(e)
             self.sensor = False
-
+        
+        try:
+        	self.disp = adafruit_ssd1306.SSD1306_I2C(128, 64, self.i2c)
+        	self.disp.fill(0)
+			self.disp.show()
+			
+			# Create blank image for drawing.
+			# Make sure to create image with mode '1' for 1-bit color.
+			self.oled_width = self.disp.width
+			self.oled_height = self.disp.height
+			self.image = Image.new("1", (self.oled_width, self.oled_height))
+			# Get drawing object to draw on image.
+			self.draw = ImageDraw.Draw(self.image)
+			# Draw a black filled box to clear the image.
+			self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=0, fill=0)
+			# Load default font.
+			self.oled_font = ImageFont.load_default()
+        except Exception as e:
+			print(e)
+			
+		self.ip_adress = "Not connected"
+		self.ssid = "Not connected"
+		
+	def get_ssid(self):
+		"""Get the current WiFi SSID"""
+		try:
+		    # Try using iwgetid command
+		    result = subprocess.check_output(['iwgetid', '-r'], stderr=subprocess.DEVNULL)
+		    self.ssid = result.decode('utf-8').strip()
+		except (subprocess.CalledProcessError, FileNotFoundError):
+		    self.ssid = "Not Connected"
+	
+	def get_ip(self):
+		"""Get the local IP address"""
+		try:
+		    # Create a socket connection to determine the local IP
+		    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		    # Connect to an external address (doesn't actually send data)
+		    s.connect(("8.8.8.8", 80))
+		    local_ip = s.getsockname()[0]
+		    s.close()
+		    self.ip_adress = local_ip
+		except Exception:
+		    self.ip_adress = "No Connection"
     
     def list_available_ports(self):
         """List all available serial ports"""
@@ -317,6 +368,12 @@ def update_line_plot():
 def refresh_ports():
     port_select.set_options(reader.list_available_ports_in_list())
 
+def update_oled():
+	reader.get_ssid()
+	reader.get_ip()
+	reader.draw.text((x, top + 0), "SSID: " + reader.ssid, font=font, fill=255)
+    reader.draw.text((x, top + 8), "IP: " + reader.ip_adress, font=font, fill=255)
+
 def save_user():
     print(user_input.value)
     if user_input.value is not None and user_input.value != "":
@@ -382,6 +439,7 @@ user_expansion.open()
 
 value_updates = ui.timer(5, update_CO2_value, active=False)
 line_updates = ui.timer(5, update_line_plot, active=False)
+oled_updates = ui.timer(5, update_oled, active=True)
 
 
 try:
