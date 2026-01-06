@@ -1,5 +1,12 @@
-import time
+#!/usr/bin/env python3
+"""
+Display Network SSID and Local IP Address on OLED Screen
+For Raspberry Pi with SSD1306 OLED Display (128x64 or 128x32)
+"""
+
+import subprocess
 import socket
+import time
 
 def get_ssid():
     """Get the current WiFi SSID"""
@@ -23,8 +30,8 @@ def get_local_ip():
         return local_ip
     except Exception:
         return "No Connection"
-        
- def main():    
+
+def main():
     try:
         while True:
             # Get current network information
@@ -32,6 +39,8 @@ def get_local_ip():
             local_ip = get_local_ip()
             print(ssid)
             print(local_ip)
+            
+            # Update every 5 seconds
             time.sleep(5)
             
     except KeyboardInterrupt:
