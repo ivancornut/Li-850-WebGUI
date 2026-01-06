@@ -29,11 +29,11 @@ class Li_850_client():
         self.user = "None"
         self.sensor = False
 	
-		try:
-			import board
-			self.i2c = board.I2C()
-		except Exception as e:
-			print(e)
+        try:
+            import board
+            self.i2c = board.I2C()
+        except Exception as e:
+            print(e)
         
         try:
             import adafruit_sht4x
@@ -46,48 +46,47 @@ class Li_850_client():
             self.sensor = False
         
         try:
-        	self.disp = adafruit_ssd1306.SSD1306_I2C(128, 64, self.i2c)
-        	self.disp.fill(0)
-			self.disp.show()
-			
-			# Create blank image for drawing.
-			# Make sure to create image with mode '1' for 1-bit color.
-			self.oled_width = self.disp.width
-			self.oled_height = self.disp.height
-			self.image = Image.new("1", (self.oled_width, self.oled_height))
-			# Get drawing object to draw on image.
-			self.draw = ImageDraw.Draw(self.image)
-			# Draw a black filled box to clear the image.
-			self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=0, fill=0)
-			# Load default font.
-			self.oled_font = ImageFont.load_default()
+            self.disp = adafruit_ssd1306.SSD1306_I2C(128, 64, self.i2c)
+            self.disp.fill(0)
+            self.disp.show()
+            # Create blank image for drawing.
+            # Make sure to create image with mode '1' for 1-bit color.
+            self.oled_width = self.disp.width
+            self.oled_height = self.disp.height
+            self.image = Image.new("1", (self.oled_width, self.oled_height))
+            # Get drawing object to draw on image.
+            self.draw = ImageDraw.Draw(self.image)
+            # Draw a black filled box to clear the image.
+            self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=0, fill=0)
+            # Load default font.
+            self.oled_font = ImageFont.load_default()
         except Exception as e:
-			print(e)
+            print(e)
 			
-		self.ip_adress = "Not connected"
-		self.ssid = "Not connected"
+        self.ip_adress = "Not connected"
+        self.ssid = "Not connected"
 		
-	def get_ssid(self):
-		"""Get the current WiFi SSID"""
-		try:
-		    # Try using iwgetid command
-		    result = subprocess.check_output(['iwgetid', '-r'], stderr=subprocess.DEVNULL)
-		    self.ssid = result.decode('utf-8').strip()
-		except (subprocess.CalledProcessError, FileNotFoundError):
-		    self.ssid = "Not Connected"
+    def get_ssid(self):
+        """Get the current WiFi SSID"""
+        try:
+            # Try using iwgetid command
+            result = subprocess.check_output(['iwgetid', '-r'], stderr=subprocess.DEVNULL)
+            self.ssid = result.decode('utf-8').strip()
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            self.ssid = "Not Connected"
 	
-	def get_ip(self):
-		"""Get the local IP address"""
-		try:
-		    # Create a socket connection to determine the local IP
-		    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		    # Connect to an external address (doesn't actually send data)
-		    s.connect(("8.8.8.8", 80))
-		    local_ip = s.getsockname()[0]
-		    s.close()
-		    self.ip_adress = local_ip
-		except Exception:
-		    self.ip_adress = "No Connection"
+    def get_ip(self):
+        """Get the local IP address"""
+        try:
+            # Create a socket connection to determine the local IP
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            # Connect to an external address (doesn't actually send data)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+            self.ip_adress = local_ip
+        except Exception:
+            self.ip_adress = "No Connection"
     
     def list_available_ports(self):
         """List all available serial ports"""
@@ -369,10 +368,10 @@ def refresh_ports():
     port_select.set_options(reader.list_available_ports_in_list())
 
 def update_oled():
-	reader.get_ssid()
-	reader.get_ip()
-	reader.draw.text((x, top + 0), "SSID: " + reader.ssid, font=font, fill=255)
-    reader.draw.text((x, top + 8), "IP: " + reader.ip_adress, font=font, fill=255)
+    reader.get_ssid()
+    reader.get_ip()
+    reader.draw.text((2, 2 + 0), "SSID: " + reader.ssid, font=reader.oled_font, fill=255)
+    reader.draw.text((2, 2 + 8), "IP: " + reader.ip_adress, font=reader.oled_font, fill=255)
 
 def save_user():
     print(user_input.value)
