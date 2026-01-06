@@ -381,8 +381,18 @@ def update_oled():
     if reader.oled:
         reader.get_ssid()
         reader.get_ip()
+        reader.image = Image.new("1", (reader.oled_width, reader.oled_height))
+            # Get drawing object to draw on image.
+        reader.draw = ImageDraw.Draw(reader.image)
+            # Draw a black filled box to clear the image.
+            #self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=100, fill=255)
+            # Load default font.
+        reader.disp.fill(0)
+        #reader.draw.text((0,0), text = "Loading...",font = self.oled_font, outline = 100,fill=255)
         reader.draw.text((2, 2 + 0), "SSID: " + reader.ssid, font=reader.oled_font, fill=255)
         reader.draw.text((2, 2 + 8), "IP: " + reader.ip_adress, font=reader.oled_font, fill=255)
+        reader.disp.image(reader.image)
+        reader.disp.show()
     else:
         print("No oled screen")
 
