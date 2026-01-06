@@ -59,11 +59,16 @@ class Li_850_client():
             self.draw = ImageDraw.Draw(self.image)
             # Draw a black filled box to clear the image.
             #self.draw.rectangle((0, 0, self.oled_width, self.oled_height), outline=100, fill=255)
-            self.draw.text((0,0), text = "Loading...",outline = 100,fill=255)
+           
             # Load default font.
+            self.disp.fill(0)
             self.oled_font = ImageFont.load_default()
+            self.draw.text((0,0), text = "Loading...",font = self.oled_font, outline = 100,fill=255)
+            self.disp.image(self.image)
+            self.disp.show()
             self.oled = True
             print("Oled screen successful")
+
         except Exception as e:
             self.oled = False
             print(e)
