@@ -63,7 +63,7 @@ class Li_850_client():
             # Load default font.
             self.disp.fill(0)
             self.oled_font = ImageFont.load_default()
-            self.draw.text((0,0), text = "Loading...",font = self.oled_font, outline = 100,fill=255)
+            self.draw.text((2,10), text = "Loading...",font = self.oled_font,fill=255)
             self.disp.image(self.image)
             self.disp.show()
             self.oled = True
@@ -390,7 +390,7 @@ def update_oled():
         reader.disp.fill(0)
         #reader.draw.text((0,0), text = "Loading...",font = self.oled_font, outline = 100,fill=255)
         reader.draw.text((2, 2 + 0), "SSID: " + reader.ssid, font=reader.oled_font, fill=255)
-        reader.draw.text((2, 2 + 8), "IP: " + reader.ip_adress, font=reader.oled_font, fill=255)
+        reader.draw.text((2, 2 + 12), "IP: " + reader.ip_adress, font=reader.oled_font, fill=255)
         reader.disp.image(reader.image)
         reader.disp.show()
     else:
