@@ -1,4 +1,5 @@
 # Li-850-WebGUI
+<img width="436" height="968" alt="image" src="https://github.com/user-attachments/assets/7f92d5a8-94ea-448f-bf75-61c71066104a" />
 A webgui for the Li-850 IRGA to be used in the field for soil and trunk respiration with a raspberry pi 3 and smartphone.
 The aim is to make measurement as simple as possible while guaranteeing high data quality and traceability. The code is compatible with an associated SHT45 sensor for aitr temperature and relative humidity to log local conditions during your measurements.
 
@@ -41,6 +42,4 @@ mkdir data
 ## Automatic startup on launch
 Soon ...
 
-## Graphical interface
-<img width="436" height="968" alt="image" src="https://github.com/user-attachments/assets/7f92d5a8-94ea-448f-bf75-61c71066104a" />
 
